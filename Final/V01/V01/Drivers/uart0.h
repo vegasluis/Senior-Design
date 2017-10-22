@@ -165,8 +165,9 @@ void print_double_0(double data)
 }
 
 void UART_0_flush(void)
-{
-	while(UCSR0A & (1 << RXC0));
+{	
+	unsigned char dummy;
+	while(UCSR0A & (1 << RXC0))dummy = UDR0;
 }
 
 #ifdef __cpluspls

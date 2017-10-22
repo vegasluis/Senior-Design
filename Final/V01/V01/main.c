@@ -58,6 +58,7 @@ do                  		\
 	volatile uint16_t getAngle (char firstInt, char secondInt, char thirdInt);
 	volatile uint16_t getServoPos(volatile  uint16_t angle);
 	void LED_state (char servoNum, char on);
+	void clearReadString(void);
 
 	//------------------
 	//Variables need for Servo 
@@ -113,7 +114,8 @@ ISR (USART0_RX_vect)
 		unsigned char receivedChar;
 		receivedChar = UDR0;							// Read data from the RX buffer
 		putChar_0(receivedChar);
-		_delay_ms(1);
+		//_delay_ms(2);
+		_delay_us(700);
 
 		
 		//READ in char and append to end char array
@@ -152,8 +154,9 @@ ISR (USART0_RX_vect)
 			}
 			
 			charCount = 0;
+			clearReadString();
 		}
-		
+		UART_0_flush();
 	}
 }
 
@@ -165,7 +168,7 @@ ISR(WDT_vect)
 ISR(TIMER1_OVF_vect)
 { 
 	++countTick;
-	if(countTick > 10000)
+	if(countTick > 1000)
 	{	
 		startADC0();
 		waitADC();
@@ -203,6 +206,7 @@ ISR(TIMER1_OVF_vect)
 			 || (valueADC0 > 1.50 && valueADC2 > 1.50))
 		{
 			initWatchdog();
+			aboutToSleep();
 			enterSleep();
 		}
 		countTick = 0;
@@ -343,6 +347,7 @@ const int readAccel()
 	if(accelX >= 15 || accelX <= -15 || accelY >= 15 ||
 		accelY <= -15 || accelZ >= 15 || accelZ <= -15)
 	{
+		printm_0("Put servo in standstill mode\r\n");
 		PORTA |= (1<<PA0)|(1<<PA1)|(1<<PA2);
 		/*
 		 * Angles set later 
@@ -460,18 +465,20 @@ void enterSleep(void)
 
 void aboutToSleep(void)
 {
-	for(int i = 20; i < 20; ++i)
+	for(int i = 0; i < 10; ++i)
 	{
-		PORTA |= (1<<PA0);
-		PORTA &= (0<<PA1)&(0<<PA2);
-		_delay_ms(100);
-		PORTA |= (1<<PA1);
-		PORTA &= (0<<PA0)&(0<<PA2);
-		_delay_ms(100);
-		PORTA |= (1<<PA2);
-		PORTA &= (0<<PA1)&(0<<PA0);
-		_delay_ms(100);
+		printm_0("inloop\r\n");
+		PORTA |= (1<<PA0|1<<PA1|1<<PA2);
+		_delay_ms(2500);
+		PORTA = 0X0;
+		_delay_ms(2500);
 	}
 	PORTA &= (0<<PA0)|(0<<PA1)|(0<<PA2);
+}
+
+void clearReadString(void)
+{
+	for(int i = 0; i < 20; ++i)
+		readString[i] = "\0";
 }
 

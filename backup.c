@@ -138,7 +138,7 @@ ISR (USART0_RX_vect)
 
 			if(receivedChar != '\0')
 			{
-				/*temp = getTemp();
+				temp = getTemp();
 				printm_0("Temp: ");
 				print_int_0(temp);
 				printm_0(" C*\r\n");
@@ -148,10 +148,9 @@ ISR (USART0_RX_vect)
 					aboutToSleep();
 					initWatchdog();
 					enterSleep();
-				}*/	
+				}	
 
-				//if(readAccel() != 1) setServos(readString); 
-				setServos(readString); 
+				if(readAccel() != 1) setServos(readString); 
 			}
 			
 			charCount = 0;
@@ -210,7 +209,6 @@ ISR(TIMER1_OVF_vect)
 			aboutToSleep();
 			enterSleep();
 		}
-
 		countTick = 0;
 	}
 }
@@ -346,8 +344,8 @@ const int readAccel()
 	 * to do some image processing
 	 */
 
-	if(accelX >= 10 || accelX <= -10 || accelY >= 10 ||
-		accelY <= -10 || accelZ >= 15 || accelZ <= -15)
+	if(accelX >= 15 || accelX <= -15 || accelY >= 15 ||
+		accelY <= -15 || accelZ >= 15 || accelZ <= -15)
 	{
 		printm_0("Put servo in standstill mode\r\n");
 		PORTA |= (1<<PA0)|(1<<PA1)|(1<<PA2);
@@ -425,9 +423,8 @@ void startUp(void)
 	//MPU6050
 
 	//initate MPU6050
-	//i2c_start(MPU6050_ADDRESS+I2C_WRITE); 
-	//mpu6050_init();
-	printm_0("MPU6050 Initalize\r\n");
+	i2c_start(MPU6050_ADDRESS+I2C_WRITE); 
+	mpu6050_init();
 
 	//**************************************************
 
